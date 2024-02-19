@@ -103,3 +103,10 @@ done.
  PARTITION e00002 VALUES IN (2) COMMENT = 'event_id = 2' ENGINE = InnoDB,
  PARTITION e00003 VALUES IN (3,4) COMMENT = 'event_id = 3 and 4' ENGINE = InnoDB) */
 ```
+
+## Testing
+
+To test against real MySQL database, you need following:
+
+- Set `MYSQL_TEST_DSN` environment variable
+- Run tests with `-tags=integration`, like `go test -v -tags=integration ./...`

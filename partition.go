@@ -17,7 +17,9 @@ const (
 	CatchAllPartitionValue = "MAXVALUE"
 )
 
-// Partition describe partition setting
+// Partition describes partition setting representing MySQL's PARTITION
+// In LIST Partitioning, it will be like "PARTITION ${Name} VALUES IN (${Description})"
+// In RANGE Partitioning, it will be like "PARTITION ${Name} VALUES LESS THAN (${Description})"
 type Partition struct {
 	Name        string
 	Description string
@@ -29,9 +31,11 @@ func NewPartition(name, description, comment string) *Partition {
 	return &Partition{name, description, comment}
 }
 
-// Partitioner wrapper for handler
+// Partitioner is a interface to manupilate partitions of db.
 type Partitioner interface {
+	// IsPartitioned accesses the database and returns whether it is partitioned by specified partitioning type.
 	IsPartitioned() (bool, error)
+	// HasPartition accesses the database and returns whether it has given Partition.
 	HasPartition(*Partition) (bool, error)
 
 	Creates(...*Partition) error
@@ -44,11 +48,15 @@ type Partitioner interface {
 	PrepareDrops(...*Partition) (Handler, error)
 	PrepareTruncates(...*Partition) (Handler, error)
 
-	Dryrun(bool)
-	Verbose(bool)
+	// Dryrun sets dry-run option.
+	// Same as passing Dryrun(val) on create.
+	Dryrun(dryrun bool)
+	// Verbose sets verbosity.
+	// Same as passing Verbose(val) on create.
+	Verbose(verbose bool)
 }
 
-// Handler exec queries
+// Handler exec queries on Execute().
 type Handler interface {
 	Execute() error
 	Statement() string
@@ -312,6 +320,8 @@ func Verbose(verbose bool) Option {
 // Type set partition type.
 // list partiton default LIST.
 // range partition default RANGE.
+//
+// Setting Type("FOO BAR") will become `PARTITON BY FOO BAR (${column})“
 func Type(t string) Option {
 	return func(p *partitioner) {
 		p.partitionType = strings.ToUpper(t)
@@ -319,6 +329,7 @@ func Type(t string) Option {
 }
 
 // CatchAllPartitionName set catch all partition name for range partition
+// With this option, Partitioner creates `LESS THAN MAXVALUE` partition.
 func CatchAllPartitionName(name string) Option {
 	return func(p *partitioner) {
 		if r, ok := p.partBuilder.(*Range); ok {

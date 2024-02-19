@@ -23,7 +23,7 @@ func init() {
 	bracketRegexp = regexp.MustCompile(`\(`)
 }
 
-// NewRangePartitioner is XXX
+// NewRangePartitioner returns a new Partitioner for RANGE partitioning.
 func NewRangePartitioner(db *sql.DB, table, expresstion string, options ...Option) Partitioner {
 	p := &partitioner{
 		table:         table,

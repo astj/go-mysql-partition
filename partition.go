@@ -178,7 +178,7 @@ func (p *partitioner) buildParts(partitions ...*Partition) (string, error) {
 
 func (p *partitioner) buildCreatesSQL(partitions ...*Partition) (string, error) {
 	if r, ok := p.partBuilder.(*Range); ok && r.catchAllPartitionName != "" {
-		partitions = append(partitions, &Partition{Name: r.catchAllPartitionName, Description: CatchAllPartitionValue})
+		partitions = append(partitions, newCatchAllPartition(r.catchAllPartitionName))
 	}
 
 	parts, err := p.buildParts(partitions...)

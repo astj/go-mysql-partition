@@ -17,8 +17,10 @@ const (
 	CatchAllPartitionValue = "MAXVALUE"
 )
 
-// Partition describes partition setting representing MySQL's PARTITION
+// Partition describes partition setting representing MySQL's PARTITION.
+//
 // In LIST Partitioning, it will be like "PARTITION ${Name} VALUES IN (${Description})"
+//
 // In RANGE Partitioning, it will be like "PARTITION ${Name} VALUES LESS THAN (${Description})"
 type Partition struct {
 	Name        string
@@ -26,7 +28,7 @@ type Partition struct {
 	Comment     string
 }
 
-// NewPartition is XXX
+// NewPartition is the constructor.
 func NewPartition(name, description, comment string) *Partition {
 	return &Partition{name, description, comment}
 }
@@ -48,10 +50,10 @@ type Partitioner interface {
 	PrepareDrops(...*Partition) (Handler, error)
 	PrepareTruncates(...*Partition) (Handler, error)
 
-	// Dryrun sets dry-run option.
+	// Dryrun changes its dry-run switch.
 	// Same as passing Dryrun(val) on create.
 	Dryrun(dryrun bool)
-	// Verbose sets verbosity.
+	// Verbose change its verbosity.
 	// Same as passing Verbose(val) on create.
 	Verbose(verbose bool)
 }
@@ -317,19 +319,16 @@ func Verbose(verbose bool) Option {
 	}
 }
 
-// Type set partition type.
-// list partiton default LIST.
-// range partition default RANGE.
-//
-// Setting Type("FOO BAR") will become `PARTITON BY FOO BAR (${column})“
+// Type overrides partitioning type.
 func Type(t string) Option {
 	return func(p *partitioner) {
 		p.partitionType = strings.ToUpper(t)
 	}
 }
 
-// CatchAllPartitionName set catch all partition name for range partition
-// With this option, Partitioner creates `LESS THAN MAXVALUE` partition.
+// CatchAllPartitionName sets catch all partition name for range partition.
+//
+// With this option, Partitioner adds `LESS THAN MAXVALUE` partition on Creates().
 func CatchAllPartitionName(name string) Option {
 	return func(p *partitioner) {
 		if r, ok := p.partBuilder.(*Range); ok {

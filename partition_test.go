@@ -27,6 +27,9 @@ func TestList(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test`)
+	}(db)
 
 	p := NewListPartitioner(db, "test", "event_id")
 
@@ -158,6 +161,9 @@ func TestRange(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test2`)
+	}(db)
 
 	p := NewRangePartitioner(db, "test2", "created_at", Type("range columns"))
 
@@ -306,6 +312,9 @@ func TestDryrun(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test4`)
+	}(db)
 
 	p := NewListPartitioner(db, "test4", "event_id", Dryrun(true))
 
@@ -346,6 +355,9 @@ func TestHandler(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test5`)
+	}(db)
 
 	p := NewListPartitioner(db, "test5", "event_id")
 

@@ -24,6 +24,11 @@ jobs:
           MYSQL_ROOT_PASSWORD: ""
           MYSQL_DATABASE: partition_test
           MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - uses: actions/checkout@v4
 

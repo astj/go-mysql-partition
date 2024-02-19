@@ -11,8 +11,8 @@ jobs:
   test:
     strategy:
         matrix:
-          go: [stable, oldstable]
-          mysql: [mysql:5.7, mysql:8] # I know 5.7 has been reached EoL...
+          go: ['stable', 'oldstable']
+          mysql: ['mysql:5.7', 'mysql:8'] # I know 5.7 has been reached EoL...
     runs-on: ubuntu-latest
     services:
       db:

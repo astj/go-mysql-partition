@@ -80,21 +80,3 @@ func Test_range_buildPart(t *testing.T) {
 		t.Fatalf("error invalid result:%s", diff)
 	}
 }
-
-func Test_range_buildCatchAllPart(t *testing.T) {
-	r := &Range{
-		table: "test3",
-		catchAllPartitionName: "pmax",
-	}
-
-	expect := "ALTER TABLE test3 ADD PARTITION (PARTITION pmax VALUES LESS THAN (MAXVALUE))"
-
-	result, err := r.buildCatchAllPart()
-	if err != nil {
-		t.Fatal("error build catcch all part.", err.Error())
-	}
-
-	if diff := cmp.Diff(result, expect); diff != "" {
-		t.Fatalf("error invalid result:%s", diff)
-	}
-}

@@ -9,7 +9,7 @@ import (
 // List is list partition part builer
 type List struct{}
 
-// NewListPartitioner is XXX
+// NewListPartitioner returns a new Partitioner for LIST partitioning.
 func NewListPartitioner(db *sql.DB, table, expresstion string, options ...Option) Partitioner {
 	p := &partitioner{
 		table:         table,

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	_ "github.com/go-sql-driver/mysql" // for connect mysql
 	"github.com/pkg/errors"
 )
 
@@ -18,21 +17,23 @@ const (
 	CatchAllPartitionValue = "MAXVALUE"
 )
 
-// Partition describe partition setting
+// Partition describes partition setting representing MySQL's PARTITION.
 type Partition struct {
 	Name        string
 	Description string
 	Comment     string
 }
 
-// NewPartition is XXX
+// NewPartition is the constructor.
 func NewPartition(name, description, comment string) *Partition {
 	return &Partition{name, description, comment}
 }
 
-// Partitioner wrapper for handler
+// Partitioner is a interface to manupilate partitions of db.
 type Partitioner interface {
+	// IsPartitioned accesses the database and returns whether it is partitioned by specified partitioning type.
 	IsPartitioned() (bool, error)
+	// HasPartition accesses the database and returns whether it has given Partition.
 	HasPartition(*Partition) (bool, error)
 
 	Creates(...*Partition) error
@@ -45,11 +46,15 @@ type Partitioner interface {
 	PrepareDrops(...*Partition) (Handler, error)
 	PrepareTruncates(...*Partition) (Handler, error)
 
-	Dryrun(bool)
-	Verbose(bool)
+	// Dryrun changes its dry-run switch.
+	// Same as passing Dryrun(val) on create.
+	Dryrun(dryrun bool)
+	// Verbose change its verbosity.
+	// Same as passing Verbose(val) on create.
+	Verbose(verbose bool)
 }
 
-// Handler exec queries
+// Handler exec queries on Execute().
 type Handler interface {
 	Execute() error
 	Statement() string
@@ -171,7 +176,7 @@ func (p *partitioner) buildParts(partitions ...*Partition) (string, error) {
 
 func (p *partitioner) buildCreatesSQL(partitions ...*Partition) (string, error) {
 	if r, ok := p.partBuilder.(*Range); ok && r.catchAllPartitionName != "" {
-		partitions = append(partitions, &Partition{Name: r.catchAllPartitionName, Description: CatchAllPartitionValue})
+		partitions = append(partitions, newCatchAllPartition(r.catchAllPartitionName))
 	}
 
 	parts, err := p.buildParts(partitions...)
@@ -310,16 +315,16 @@ func Verbose(verbose bool) Option {
 	}
 }
 
-// Type set partition type.
-// list partiton default LIST.
-// range partition default RANGE.
+// Type overrides partitioning type.
 func Type(t string) Option {
 	return func(p *partitioner) {
 		p.partitionType = strings.ToUpper(t)
 	}
 }
 
-// CatchAllPartitionName set catch all partition name for range partition
+// CatchAllPartitionName sets catch all partition name for range partition.
+//
+// With this option, Partitioner adds `LESS THAN MAXVALUE` partition on Creates().
 func CatchAllPartitionName(name string) Option {
 	return func(p *partitioner) {
 		if r, ok := p.partBuilder.(*Range); ok {

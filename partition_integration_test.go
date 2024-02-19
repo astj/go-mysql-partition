@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"os"
 	"testing"
+
+	_ "github.com/go-sql-driver/mysql" // for connect mysql
 )
 
 func getMySQLDSN(t *testing.T) string {

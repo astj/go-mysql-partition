@@ -1,20 +1,23 @@
+//go:build integration
+
 package partition
 
 import (
 	"database/sql"
+	"os"
 	"testing"
-
-	"github.com/lestrrat/go-test-mysqld"
 )
 
-func TestList(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
+func getMySQLDSN(t *testing.T) string {
+	dsn := os.Getenv("MYSQL_TEST_DSN")
+	if dsn == "" {
+		t.Fatal("You must set MYSQL_TEST_DSN environment variable to run tests.")
 	}
-	defer mysqld.Stop()
+	return dsn
+}
 
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+func TestList(t *testing.T) {
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}
@@ -26,6 +29,9 @@ func TestList(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test`)
+	}(db)
 
 	p := NewListPartitioner(db, "test", "event_id")
 
@@ -145,13 +151,7 @@ func TestList(t *testing.T) {
 }
 
 func TestRange(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
-	}
-	defer mysqld.Stop()
-
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}
@@ -163,6 +163,9 @@ func TestRange(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test2`)
+	}(db)
 
 	p := NewRangePartitioner(db, "test2", "created_at", Type("range columns"))
 
@@ -299,13 +302,7 @@ func TestRange(t *testing.T) {
 }
 
 func TestDryrun(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
-	}
-	defer mysqld.Stop()
-
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}
@@ -317,6 +314,9 @@ func TestDryrun(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test4`)
+	}(db)
 
 	p := NewListPartitioner(db, "test4", "event_id", Dryrun(true))
 
@@ -345,13 +345,7 @@ func TestDryrun(t *testing.T) {
 }
 
 func TestHandler(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
-	}
-	defer mysqld.Stop()
-
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}
@@ -363,6 +357,9 @@ func TestHandler(t *testing.T) {
     )`); err != nil {
 		t.Fatal("error exec sceham.", err.Error())
 	}
+	defer func(db *sql.DB) {
+		db.Exec(`DROP TABLE test5`)
+	}(db)
 
 	p := NewListPartitioner(db, "test5", "event_id")
 

@@ -1,0 +1,43 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  test:
+    strategy:
+        matrix:
+          go: ['stable', 'oldstable']
+          mysql: ['mysql:5.7', 'mysql:8'] # I know 5.7 has been reached EoL...
+        fail-fast: false
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: ${{ matrix.mysql }}
+        ports:
+          - 13306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: ""
+          MYSQL_DATABASE: partition_test
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go }}
+
+    - name: Test
+      run: go test -v -tags=integration ./...
+      env:
+        MYSQL_TEST_DSN: 'root@tcp(127.0.0.1:13306)/partition_test'

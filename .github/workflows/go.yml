@@ -28,6 +28,6 @@ jobs:
         go-version: '1.21'
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v -tags=integration ./...
       env:
         MYSQL_TEST_DSN: 'root@tcp(127.0.0.1:13306)/partition_test'

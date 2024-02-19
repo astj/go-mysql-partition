@@ -2,19 +2,20 @@ package partition
 
 import (
 	"database/sql"
+	"os"
 	"testing"
-
-	"github.com/lestrrat/go-test-mysqld"
 )
 
-func TestList(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
+func getMySQLDSN(t *testing.T) string {
+	dsn := os.Getenv("MYSQL_TEST_DSN")
+	if dsn == "" {
+		t.Fatal("You must set MYSQL_TEST_DSN environment variable to run tests.")
 	}
-	defer mysqld.Stop()
+	return dsn
+}
 
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+func TestList(t *testing.T) {
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}
@@ -145,13 +146,7 @@ func TestList(t *testing.T) {
 }
 
 func TestRange(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
-	}
-	defer mysqld.Stop()
-
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}
@@ -299,13 +294,7 @@ func TestRange(t *testing.T) {
 }
 
 func TestDryrun(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
-	}
-	defer mysqld.Stop()
-
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}
@@ -345,13 +334,7 @@ func TestDryrun(t *testing.T) {
 }
 
 func TestHandler(t *testing.T) {
-	mysqld, err := mysqltest.NewMysqld(nil)
-	if err != nil {
-		t.Fatal("error new mysqld.", err.Error())
-	}
-	defer mysqld.Stop()
-
-	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
+	db, err := sql.Open("mysql", getMySQLDSN(t))
 	if err != nil {
 		t.Fatal("error open.", err.Error())
 	}

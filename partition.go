@@ -18,10 +18,6 @@ const (
 )
 
 // Partition describes partition setting representing MySQL's PARTITION.
-//
-// In LIST Partitioning, it will be like "PARTITION ${Name} VALUES IN (${Description})"
-//
-// In RANGE Partitioning, it will be like "PARTITION ${Name} VALUES LESS THAN (${Description})"
 type Partition struct {
 	Name        string
 	Description string
